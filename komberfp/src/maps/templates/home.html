@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{%load static%}
+{%block morecss%}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+   integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+   crossorigin=""></script>
+{%endblock%}
+{%block content%}
+<!-- Details 1 -->
+<div class="basic-1">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="text-container">
+                    <h2>Tampilan Map</h2>
+                    <p>Lokasi terakhir dari {{nama}}:</p>
+                    <h4 id="address">somelocation</h4>
+                    <p>Sedang:</p>
+                    <h4 id="aktivitas">{{aktivitas}}</h4>
+                </div> <!-- end of text-container -->
+            </div> <!-- end of col -->
+            <div class="col-lg-6">
+                <div class="map-responsive">
+                    <div id="mapid"></div>
+                </div>
+            </div> <!-- end of col -->
+        </div> <!-- end of row -->
+    </div> <!-- end of container -->
+</div> <!-- end of basic-1 -->
+<!-- end of details 1 -->
+<style>
+    #mapid { height: 500px; }
+</style>
+{%endblock%}
+{%block morejs%}
+<script>
+    var mymap;
+    var marker;
+    function getAddress(lat,long){
+        $.ajax({
+            url: "http://api.positionstack.com/v1/reverse?access_key=fa7f91cd4dbf87e083c21ba35eb19077&query="+lat+","+long,
+            context: document.body
+        }).done(function(data) {
+            $('#address').html(data["data"][0]["label"]);
+        });
+    }
+    async function updateActivity(){
+        $.ajax({
+            url: "{% url 'home-view' %}",
+            context: document.body
+        }).done(function(data) {
+            $('#aktivitas').html(data["aktivitas"]);
+            var newLatLng = new L.LatLng(data["latitude"], data["longitude"]);
+            marker.setLatLng(newLatLng);
+            getAddress(data["latitude"], data["longitude"]);
+        });
+    }
+    $(document).ready(function(){
+        getAddress({{latitude}}, {{longitude}});
+        mymap = L.map('mapid').setView([{{latitude}}, {{longitude}}], 13);
+        L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+            maxZoom: 18,
+            id: 'mapbox/streets-v11',
+            tileSize: 512,
+            zoomOffset: -1,
+            accessToken: 'pk.eyJ1IjoidGVoZWxiYXJ1IiwiYSI6ImNraml6eDYxNjFlc2Iyc2xvZXlkNDBvbDIifQ.j4qyW9FgvEFhGLb0h-XEgw'
+        }).addTo(mymap);
+        marker = L.marker([{{latitude}}, {{longitude}}]).addTo(mymap);
+        marker.bindPopup("<b>Lokasi Terakhir</b><br>Rizaldi").openPopup();
+        setInterval(updateActivity,2000);
+    });
+</script>
+{%endblock%}
