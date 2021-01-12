@@ -94,14 +94,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         @Override
                         public void onSuccess(Location location) {
                             if (location != null) {
-                                latitude = (float) location.getLatitude();
-                                longitude = (float) location.getLongitude();
+                                latitude = (float) location.getLatitude(); //get lat
+                                longitude = (float) location.getLongitude(); //get log
                             }
                         }
                     });
-            eventData[0] = event.values[0];
-            eventData[1] = event.values[1];
-            eventData[2] = event.values[2];
+            eventData[0] = event.values[0]; //get x data
+            eventData[1] = event.values[1]; //get y data
+            eventData[2] = event.values[2]; //get z data
             eventData[3] = latitude;
             eventData[4] = longitude;
 
